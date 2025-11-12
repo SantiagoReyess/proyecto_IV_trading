@@ -17,15 +17,21 @@ def main():
     #Select cointegrated pairs
     #pares, stats = encontrar_pares_cointegrados(data, alpha=0.05)
 
-    stock1 = data["AMD"]
-    stock2 = data["TSM"] 
+    #Filter only the pair selected
+    data = data.loc[:, ["AMD", "TSM"]]
 
     # Plot stocks to verify cointegration
     #plot_normalized(series1=stock1, series2=stock2)
  
+    # Train, Test
+    split = int(len(data) * .60)
+    train = data.iloc[:split]
+    test = data.iloc[split:]
+
+    # Start Backtesting
 
 
-    return 
+    return print(len(data), len(train), len(test))
 
 if __name__ == "__main__":
     main()
