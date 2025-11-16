@@ -4,30 +4,35 @@ import numpy as np
 
 class KalmanFilterRegression:
     """
-    Implementa un Filtro de Kalman recursivo para una regresión lineal (Modelo 1).
-    Estima los estados [beta, intercepto] de forma dinámica.
+    Implements a recursive Kalman Filter for a linear regression (Model 1).
+    Dynamically estimates the states [beta, intercept].
 
-    Ecuación de Medición: y = H * state + v
-    Donde:
-        y (float): Precio de A
-        H (array 1x2): [Precio de B, 1]
-        state (array 2x1): [beta, intercepto]
-        v: Ruido de medición (R)
+    Measurement Equation: y = H * state + v
+    Where:
+        y (float): Price of asset A
+        H (array 1x2): [Price of asset B, 1]
+        state (array 2x1): [beta, intercept]
+        v: Measurement noise (R)
 
-    Ecuación de Transición: state_t = F * state_t-1 + w
-    Donde:
-        F (matrix 2x2): Matriz de identidad (asume que beta y alfa son caminatas aleatorias)
-        w: Ruido del proceso (Q)
+    State Transition Equation: state_t = F * state_t-1 + w
+    Where:
+        F (2x2 matrix): Identity matrix (assumes beta and alpha follow random walks)
+        w: Process noise (Q)
     """
 
     def __init__(self, R, Q, initial_state, initial_covariance):
         """
-        Inicializa el filtro.
+        Initialize the filter.
 
-        R (float): Varianza del ruido de medición (qué tanto confiamos en el precio).
-        Q (matrix 2x2): Matriz de covarianza del ruido del proceso (qué tanto esperamos que cambien beta y alfa).
-        initial_state (array 2x1): Valores iniciales para [beta, intercepto].
-        initial_covariance (matrix 2x2): Incertidumbre inicial sobre el estado.
+        R (float): Variance of the measurement noise (how much we trust the observed price).
+
+        Q (2x2 matrix): Covariance matrix of the process noise (how much we expect beta and alpha to change over time).
+
+        initial_state (2x1 array): Initial values for 
+        beta,intercept
+        beta,intercept.
+
+        initial_covariance (2x2 matrix): Initial uncertainty associated with the state estimate.
         """
         self.R = R
         self.Q = Q
@@ -39,10 +44,15 @@ class KalmanFilterRegression:
 
     def update(self, y, H):
         """
-        Actualiza el filtro con un nuevo dato (un nuevo día).
+        Updates the Kalman Filter with a new observation (a new day).
 
-        y (float): Precio del activo A (la medición)
-        H (array 1x2): [Precio del activo B, 1.0] (la matriz de observación)
+        Parameters
+        ----------
+        y : float
+            Price of asset A (the measurement).
+
+        H : array-like (1x2)
+            Observation matrix, typically [Price of asset B, 1.0].
         """
 
         # --- 1. Paso de PREDICCIÓN ---
@@ -70,9 +80,9 @@ class KalmanFilterRegression:
         self.state_covariance = (I - (K @ H)) @ predicted_state_cov
 
     def get_hedge_ratio(self):
-        """Retorna el hedge ratio (B1) actual."""
+        """Returns the current hedge ratio (B1)."""
         return self.state_mean[0, 0]  # El primer elemento del estado (beta)
 
     def get_intercept(self):
-        """Retorna el intercepto (alfa) actual."""
+        """Returns the current intercept (alpha)."""
         return self.state_mean[1, 0]

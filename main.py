@@ -9,11 +9,11 @@ from trade_stats import compute_trade_stats
 
 
 def align_portfolio_series(port_hist, df_segment, window_size):
-    """
-    Alinea la curva de portafolio con las fechas del segmento.
-    - Ignora el primer valor (cash inicial).
-    - Empieza a contar desde df_segment.index[window_size:].
-    """
+    '''
+    Aligns the portfolio equity curve with the dates of the segment.
+    - Ignores the first value (initial cash).
+    - Starts indexing from df_segment.index[window_size:].
+    '''
     values = np.array(port_hist[1:])           # quitamos cash0
     dates = df_segment.index[window_size:]     # después del warm-up
 

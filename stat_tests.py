@@ -6,10 +6,10 @@ from itertools import combinations
 
 
 def prueba_adf(df, alpha=0.05):
-    """
-    Filtra columnas cuyo proceso NO es estacionario según ADF.
-    (Esta función no cambia)
-    """
+    '''
+    Filters columns whose process is NOT stationary according to the ADF test.
+    (This function does not change)
+    '''
     resultados = {}
     no_estacionarios = []
     estacionarios = []
@@ -28,8 +28,7 @@ def prueba_adf(df, alpha=0.05):
 
 def johansen_cointegration_test(series1, series2, det_order=0, k_ar_diff=1, alpha=0.05):
     """
-    Prueba de cointegración Johansen para dos series.
-    (¡Actualizado con Filtro de Sanidad!)
+    Cointegration johansen test for two variables.
     """
     df = pd.concat([series1, series2], axis=1).dropna()
     df.columns = ["A", "B"]
@@ -68,7 +67,7 @@ def johansen_cointegration_test(series1, series2, det_order=0, k_ar_diff=1, alph
 
 def encontrar_pares_cointegrados(df, alpha=0.05):
     """
-    (Esta función no cambia)
+    Filters pairs that show cointegration given the johansen test and a pvalue
     """
     pares_cointegrados = []
     estadisticas = []

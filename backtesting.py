@@ -38,13 +38,79 @@ def backtesting(
     cash0: float = 1_000_000.0,
     com_pct: float = 0.125 / 100,
 ):
-    """
-    Backtest con DOS Filtros de Kalman + Modelo de Decisión
+    '''
+    Run a pairs trading backtest using two Kalman Filters:
+    one to estimate a dynamic hedge ratio (beta and alpha),
+    and another to estimate the mean-reverting behavior of the spread.
 
-    - Modelo 1 (KalmanFilterRegression): hedge ratio dinámico beta_t y alpha_t.
-    - Modelo 2 (KalmanSignalMean): media dinámica del spread.
-    - Modelo 3 (implícito): reglas de trading basadas en z-score.
-    """
+    This backtester implements:
+    1. A Kalman Filter regression on price levels to obtain a time-varying hedge ratio.
+    2. A Kalman-based mean estimator of the spread to compute dynamic z-scores.
+    3. A trading model based on z-score thresholds, dynamic position sizing, and
+       bidirectional spread trading (long-spread and short-spread).
+    4. Full position accounting, including commissions, PnL, holding period, and
+       portfolio valuation.
+
+    Parameters
+    ----------
+    dataframe_raw : pandas.DataFrame
+        DataFrame containing at least two price series (columns for stock_A and stock_B).
+        The index must be a datetime index.
+    stock_A : str
+        Column name of the first asset in the spread (y_t).
+    stock_B : str
+        Column name of the second asset (x_t).
+    window_size : int
+        Number of initial observations used for the OLS warm-up before starting
+        the Kalman Filter regression.
+    theta : float
+        Z-score threshold for opening long- or short-spread positions.
+        If z < -theta → long spread; if z > theta → short spread.
+    deadband : float, optional
+        Z-score threshold for closing a position. Default is 0.15.
+    vol_window : int, optional
+        Rolling window size used to estimate spread volatility (standard deviation).
+    cash0 : float, optional
+        Initial cash balance for the backtest.
+    com_pct : float, optional
+        Commission percentage applied to both entry and exit trades.
+
+    Returns
+    -------
+    portfolio_historic : list[float]
+        Time series of daily portfolio values.
+    z_score_history : list[float]
+        The computed z-score at each time step.
+    hr_kalman_history : list[float]
+        Time series of Kalman-estimated hedge ratios (beta_t).
+    mu_signal_history : list[float]
+        Time series of Kalman-estimated spread means (μ_t).
+    trades : list[Trade]
+        List of executed trades, each containing:
+        entry_date, exit_date, side, pnl_gross, pnl_net,
+        return_pct, holding_period, commissions.
+
+    Notes
+    -----
+    - The first Kalman Filter (KalmanFilterRegression) estimates the regression:
+        y_t = beta_t * x_t + alpha_t + noise
+      where beta_t and alpha_t evolve dynamically.
+    - The second Kalman Filter (KalmanSignalMean) tracks the mean of the spread
+      to compute a time-varying z-score.
+    - Trading logic is symmetric for going long or short on the spread.
+    - Position sizing uses a fixed fraction (20 percent) of available cash.
+    - This backtester includes full treatment of commissions on both entry and exit.
+    - If a position remains open at the end of the sample, the strategy forces a
+      closing trade and logs it.
+
+    Raises
+    ------
+    ValueError
+        If the input DataFrame length is insufficient for the initial window.
+    Exception
+        If any numerical update in the Kalman Filter fails (logged and handled).
+
+    '''
 
     if len(dataframe_raw) <= window_size:
         raise ValueError(

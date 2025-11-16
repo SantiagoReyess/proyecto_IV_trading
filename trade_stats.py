@@ -3,8 +3,8 @@ import numpy as np
 
 def compute_trade_stats(trades):
     """
-    trades: lista de objetos Trade (definidos en backtesting)
-            con atributos:
+    trades: list of trade objects (defined in backtesting)
+            with atributes:
               - pnl_net
               - pnl_gross
               - return_pct

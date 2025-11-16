@@ -3,28 +3,28 @@ import numpy as np
 
 class KalmanSignalMean:
     """
-    Kalman Filter unidimensional para la MEDIA del spread.
+    One-dimensional Kalman Filter for the MEAN of the spread.
 
-    Modelo:
-        Estado:      mu_t  (media del spread)
-        Observación: y_t = spread_t
+    Model:
+        State:        mu_t  (mean of the spread)
+        Observation:  y_t = spread_t
 
-        mu_t = mu_{t-1} + w_t,   w_t ~ N(0, Q)
-        y_t  = mu_t      + v_t,  v_t ~ N(0, R)
+            mu_t = mu_{t-1} + w_t,   w_t ~ N(0, Q)
+            y_t  = mu_t      + v_t,  v_t ~ N(0, R)
 
-    Este filtro suaviza la media del spread. El z-score se calcula como:
+    This filter smooths the mean of the spread. The z-score is computed as:
         z_t = (spread_t - mu_t) / sigma_t
-    donde sigma_t la estimamos con una ventana rolling del spread.
+    where sigma_t is estimated with a rolling window of the spread.
     """
 
     def __init__(self, mu0: float = 0.0, var0: float = 1.0,
                  q: float = 1e-4, r: float = 1e-2):
         """
-        Parámetros:
-            mu0  : valor inicial de la media del spread
-            var0 : varianza inicial (incertidumbre sobre mu0)
-            q    : varianza del ruido de proceso (qué tanto dejamos que cambie mu_t)
-            r    : varianza del ruido de medición (ruido del spread observado)
+        Parameters:
+            mu0  : initial value of the spread mean
+            var0 : initial variance (uncertainty about mu0)
+            q    : process noise variance (how much we allow mu_t to change)
+            r    : measurement noise variance (noise in the observed spread)
         """
         self.mu = float(mu0)
         self.P = float(var0)
@@ -33,9 +33,9 @@ class KalmanSignalMean:
 
     def update(self, y: float):
         """
-        Actualiza el filtro con una nueva observación del spread: y_t.
+        Updates the filter with a new spread observation: y_t.
 
-        y (float): spread observado en el tiempo t.
+        y (float): spread observed at time t.
         """
         y = float(y)
 
@@ -52,9 +52,9 @@ class KalmanSignalMean:
         self.P = (1.0 - K) * P_pred
 
     def get_mean(self) -> float:
-        """Devuelve la media filtrada mu_t."""
+        """Returns mu_t"""
         return float(self.mu)
 
     def get_variance(self) -> float:
-        """Devuelve la varianza filtrada de la media."""
+        """Returns variace"""
         return float(self.P)
